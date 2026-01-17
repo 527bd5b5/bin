@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# rename-photo-files <target_directory?>
+# ディレクトリーに存在するJPEGファイルの名前を撮影日時「yyyy-MM-dd_hh-mm-ss.jpg」に変更します。Exifデータや撮影日時が登録されていない場合は変更されません。実行にはImageMagickが必要です。
+
+TARGET_FILE_REGEX=".*\.(jpg|JPG)"
+
+if [ -d "$1" ]; then
+    targetDirectory="${1%/}"
+else
+    targetDirectory="."
+fi
+
+function renamePhotoFile {
+    targetFrom="$1"
+    targetTo="${targetFrom%/*}/$(identify -format "%[exif:DateTimeOriginal]" "$targetFrom" | sed -e "s/:/-/g" -e "s/ /_/g").jpg"
+
+    if [ "${targetTo##*/}" = ".jpg" ]; then
+        echo "${targetFrom}: Failed to get the shooting date."
+    else
+        mv --backup=t "$targetFrom" "$targetTo" && echo "Rename file ... ${targetFrom} -> ${targetTo##*/}"
+    fi
+}
+
+export -f renamePhotoFile
+
+find "$targetDirectory" -type f -regextype posix-extended -regex "$TARGET_FILE_REGEX" -print0 | \
+xargs -0i bash -c "renamePhotoFile \"{}\""

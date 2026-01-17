@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# clean
+# コマンドや最近開いたファイルの履歴を削除します。使用する際はホームディレクトリーの「.bashrc」に「alias clean="source clean"」と追記することを推奨します。
+
+clear
+
+cat /dev/null > ~/.bash_history
+cat /dev/null > ~/.local/share/recently-used.xbel
+
+history -c

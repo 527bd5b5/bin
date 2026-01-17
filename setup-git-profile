@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# setup-git-profile <name?> <email?>
+# Gitリポジトリーにユーザー情報を個別に設定します。ユーザーは自身の情報をスクリプト内の定数に設定する必要があります。
+
+DEFAULT_NAME="527bd5b5"
+DEFAULT_EMAIL="527bd5b5d689e2c32ae974c6229ff785@proton.me"
+
+if [ ! -d ./.git ]; then
+    echo "It's not a good idea to set up a profile where .git doesn't exist."
+
+    exit
+fi
+
+if [ -z "$1" ]; then
+    name="$DEFAULT_NAME"
+else
+    name="$1"
+fi
+
+if [ -z "$2" ]; then
+    email="$DEFAULT_EMAIL"
+else
+    email="$2"
+fi
+
+git config --local user.name "$name"
+git config --local user.email "$email"

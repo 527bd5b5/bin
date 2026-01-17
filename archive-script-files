@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# archive-script-files <target_directory?> <target_file_regex?> <output_file?>
+# ディレクトリーに存在する特定のファイルを一つのテキストファイルとして纏めます。成果物等をアナログの媒体としてアーカイブする際に役立ちます。
+
+HORIZON="================================================================================"
+
+if [ -d "$1" ]; then
+    targetDirectory="${1%/}/"
+else
+    targetDirectory="./"
+fi
+
+if [ ! -z "$2" ]; then
+    targetFileRegex="$2"
+else
+    targetFileRegex=".*\.(txt|md|sh)"
+fi
+
+if [ ! -z "$3" ]; then
+    outputFile="$3"
+else
+    outputFile="$(pwd)"
+    outputFile="./${outputFile##*/}.arc"
+fi
+
+case "$targetDirectory" in
+    /*) echo "$targetDirectory" > "$outputFile";;
+    *) printf "%s/\n" "$(pwd)" > "$outputFile";;
+esac
+
+export HORIZON
+export targetDirectory
+export outputFile
+
+function writeArchiveFile {
+    local targetFile="$1"
+    local targetFileLabel="//${targetFile//"$targetDirectory"/""}"
+
+    echo -e "\n${HORIZON}\n${targetFileLabel}\n${HORIZON}\n" >> "$outputFile"
+    cat "$targetFile" >> "$outputFile"
+}
+
+export -f writeArchiveFile
+
+find "$targetDirectory" -type f -regextype posix-extended -regex "$targetFileRegex" -print0 | \
+xargs -0i bash -c "writeArchiveFile \"{}\""

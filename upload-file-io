@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# upload-file-io <upload_file> <expires?>
+# file.ioにファイルを投稿します。
+
+if [ -z "$1" ] || [ ! -f "$1" ]; then
+    echo "Please specify a target file!"
+
+    exit
+fi
+
+if [ -z "$2" ]; then
+    expires="1d"
+else
+    expires="$2"
+fi
+
+curl -F "file=@${1}" "https://file.io/?expires=${expires}"

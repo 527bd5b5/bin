@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# backup-removable-to-local
+# 外部メディア等から特定のディレクトリーを複製します。ユーザーは用途に応じてスクリプト内の定数、複製元、複製先を設定する必要があります。
+
+BACKUP_DIRECTORY_FROM="/run/media/${USER}/backup"
+BACKUP_DIRECTORY_TO="/home/${USER}"
+EXCLUDE_LIST="/home/${USER}/bin/backup-ignore.txt"
+
+read -p "Are you sure you want to run \"${0##*/}\"? (Enter \"yes\" or anything else): " confirm
+
+if [ "$confirm" != "yes" ]; then
+    exit
+fi
+
+function backupDirectory {
+    rsync -av --delete --exclude-from="$EXCLUDE_LIST" "$1" "$2"
+}
+
+backupDirectory \
+    "${BACKUP_DIRECTORY_FROM}/bin" \
+    "${BACKUP_DIRECTORY_TO}"
+backupDirectory \
+    "${BACKUP_DIRECTORY_FROM}/init" \
+    "${BACKUP_DIRECTORY_TO}"
+backupDirectory \
+    "${BACKUP_DIRECTORY_FROM}/projects" \
+    "${BACKUP_DIRECTORY_TO}"

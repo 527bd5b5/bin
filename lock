@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# lock
+# コンピューターをロックします。実行にはImageMagickが必要です。ロック機能が標準搭載されていないi3ウィンドウマネージャーでの動作を想定しています。
+
+PICTURE="/tmp/i3lock.png"
+LABEL="/home/${USER}/bin/locked.png"
+
+scrot -z $PICTURE
+
+magick $PICTURE \
+    -type GrayScale \
+    -colorspace sRGB \
+    -modulate 50 \
+    PNG00:$PICTURE
+
+composite \
+    -gravity center \
+    $LABEL $PICTURE \
+    $PICTURE
+
+i3lock -i $PICTURE
+
+rm $PICTURE

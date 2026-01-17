@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# clean-git
+# Gitリポジトリーのガベージコレクション（.git内に存在する不要なファイルやオブジェクトの削除等）を行います。
+
+if [ ! -d ./.git ]; then
+    echo "It's not a good idea to run this script where .git doesn't exist."
+
+    exit
+fi
+
+git reflog expire --expire-unreachable=now --all
+git gc --prune=now

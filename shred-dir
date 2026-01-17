@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# shred-dir [-y] <target_directory?>
+# ディレクトリーに存在する全てのファイルを抹消します。
+
+confirm=""
+
+while getopts :y OPT; do
+    case $OPT in
+        y) confirm="yes";;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [ "$confirm" != "yes" ]; then
+    read -p "Are you sure you want to run \"${0##*/}\"? (Enter \"yes\" or anything else): " confirm
+fi
+
+if [ "$confirm" != "yes" ]; then
+    exit
+fi
+
+if [ -z "$1" ]; then
+    targetDirectory="$(pwd)"
+    targetDirectory="${targetDirectory%/}"
+elif [ ! -d "$1" ]; then
+    echo "You probably specified the wrong directory!"
+
+    exit
+else
+    targetDirectory="${1%/}"
+fi
+
+if [ -z "$targetDirectory" ] || [ "$targetDirectory" = "/home/${USER}" ]; then
+    echo "You probably specified the wrong directory!"
+
+    exit
+fi
+
+sudo find "$targetDirectory"/ -type f -name "*" -print0 | \
+xargs -0i sudo shred -n 1 -uz "{}" && \
+sudo rm -rf "$targetDirectory"/.*

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# view-desktop-sound
+# デスクトップ等の音声を波形として表示します。音が出せない環境で音を確認する際に役立ちます。実行にはPipe Sound Visualizer及びJavaが必要です。
+
+PIPE_SOUND_VISUALIZER="/home/${USER}/bin/pipe-sound-visualizer.jar" # https://github.com/JohnJiro/PipeSoundVisualizer
+
+ffmpeg -loglevel quiet \
+    -f pulse -i default -acodec copy \
+    -ar 48000 -ac 2 -f wav - | \
+java -jar "$PIPE_SOUND_VISUALIZER" -fw 1200 -fh 100 --col 6 --single 1> /dev/null &

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# mount-cache <cache_size?>
+# ホームディレクトリーに揮発性メモリーがホストする「cache」フォルダーをマウント（作成）します。機密性が高いファイルを扱う際に役立ちます。
+
+CACHE_DIRECTORY="/home/${USER}/cache"
+
+if [ -z "$1" ]; then
+    cacheSize="4096M"
+else
+    cacheSize="$1"
+fi
+
+mkdir -p "$CACHE_DIRECTORY"
+
+sudo mount -t tmpfs -o size="$cacheSize" tmpfs "$CACHE_DIRECTORY"

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# setup-ssh-server
+# SSHサーバーを起動します。
+
+systemctl start sshd
+systemctl status sshd
+
+ip a | grep -e inet | grep -v inet6

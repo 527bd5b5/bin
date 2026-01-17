@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# mount-share
+# SSHを用いてホームディレクトリーに他のコンピューターがホストする「share」フォルダーをマウントします。実行にはSSH File System（SSHFS）が必要です。
+
+SHARE_DIRECTORY="/home/${USER}/share"
+SSH_KEY_PATH="/home/${USER}/.ssh/${USER}/master-rsa"
+
+echo "Connect to the server..."
+
+read -p "Enter the address of the target server: " address
+
+if [ -z "$address" ]; then
+    echo "Put something in!"
+
+    exit
+fi
+
+read -p "Enter the username of the target server (default is ${USER}): " username
+
+if [ -z "$username" ]; then
+    username="$USER"
+fi
+
+mkdir -p "$SHARE_DIRECTORY"
+
+sshfs "${username}@${address}:${SHARE_DIRECTORY}" "$SHARE_DIRECTORY" -C -o IdentityFile="$SSH_KEY_PATH"

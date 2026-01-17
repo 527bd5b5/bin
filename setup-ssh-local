@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# setup-ssh-local
+# SSH等で安全に通信するための公開鍵の生成と配布を行います。
+
+SSH_KEY_DIRECTORY="/home/${USER}/.ssh/${USER}"
+SSH_KEY_NAME="master-rsa"
+
+echo "Generate private and public keys..."
+
+mkdir -p "$SSH_KEY_DIRECTORY"
+
+(cd "$SSH_KEY_DIRECTORY" && ssh-keygen -t rsa -f "$SSH_KEY_NAME")
+
+echo "Register your public key on the server..."
+
+read -p "Enter the address of the target server: " address
+
+if [ -z "$address" ]; then
+    echo "Put something in!"
+
+    exit
+fi
+
+read -p "Enter the username of the target server (default is ${USER}): " username
+
+if [ -z "$username" ]; then
+    username="$USER"
+fi
+
+ssh-copy-id -i "${SSH_KEY_DIRECTORY}/${SSH_KEY_NAME}.pub" "${username}@${address}"

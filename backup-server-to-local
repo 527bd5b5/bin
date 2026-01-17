@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# backup-server-to-local
+# SSHを用いて他のコンピューターから特定のディレクトリーを複製します。ユーザーは事前に複製元（サーバー）で「setup-ssh-server」を用いてSSHサーバーのホストを行い、複製先（クライアント）で「setup-ssh-local」を用いて公開鍵の生成と配布を行い、用途に応じてスクリプト内の定数、複製元、複製先を設定する必要があります。
+
+SSH_KEY_PATH="/home/${USER}/.ssh/${USER}/master-rsa"
+
+echo "Connect to the server..."
+
+read -p "Enter the address of the target server: " address
+
+if [ -z "$address" ]; then
+    echo "Put something in!"
+
+    exit
+fi
+
+read -p "Enter the username of the target server (default is ${USER}): " username
+
+if [ -z "$username" ]; then
+    username="$USER"
+fi
+
+# ssh -i "$SSH_KEY_PATH" "${username}@${address}"
+
+BACKUP_DIRECTORY_FROM="/home/${username}"
+BACKUP_DIRECTORY_TO="/home/${USER}"
+EXCLUDE_LIST="/home/${USER}/bin/backup-ignore.txt"
+
+read -p "Are you sure you want to run \"${0##*/}\"? (Enter \"yes\" or anything else): " confirm
+
+if [ "$confirm" != "yes" ]; then
+    exit
+fi
+
+eval `ssh-agent`
+
+ssh-add "$SSH_KEY_PATH"
+
+function backupDirectoryServerToLocal {
+    rsync -avPzh --delete --exclude-from="$EXCLUDE_LIST" \
+        -e "ssh -i \"$SSH_KEY_PATH\"" \
+        "${username}@${address}:${1}" "$2"
+}
+
+backupDirectoryServerToLocal \
+    "${BACKUP_DIRECTORY_FROM}/bin" \
+    "${BACKUP_DIRECTORY_TO}"
+backupDirectoryServerToLocal \
+    "${BACKUP_DIRECTORY_FROM}/init" \
+    "${BACKUP_DIRECTORY_TO}"
+backupDirectoryServerToLocal \
+    "${BACKUP_DIRECTORY_FROM}/projects" \
+    "${BACKUP_DIRECTORY_TO}"
+
+ssh-agent -k

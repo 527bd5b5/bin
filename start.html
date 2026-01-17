@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html lang="ja-JP">
+    <head>
+        <meta charset="UTF-8">
+        <title>私のウェルカムページ</title>
+        <style>
+            :root {
+                --black-3: rgba(0, 0, 0, 0.3);
+                --black-5: rgba(0, 0, 0, 0.5);
+                --black-8: rgba(0, 0, 0, 0.8);
+                --white-3: rgba(255, 255, 255, 0.3);
+                --white-5: rgba(255, 255, 255, 0.5);
+                --white-8: rgba(255, 255, 255, 0.8);
+            }
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: white;
+                background-color: black;
+                background-image: url("wallpaper.jpg");
+                background-position: center;
+                background-size: cover;
+            }
+            a {
+                color: cyan;
+            }
+            #panel {
+                padding: 2rem;
+                border-radius: 1rem;
+                border: solid 1px var(--white-3);
+                background-color: var(--black-5);
+                backdrop-filter: blur(8px);
+                box-shadow:
+                    0 8px 16px var(--black-5),
+                    inset -2px -2px 16px var(--black-3),
+                    inset 2px 2px 16px var(--white-3);
+            }
+            .searchBox {
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                margin: 0.5rem;
+            }
+            .searchBox label {
+                margin-right: 0.5rem;
+            }
+            .searchBox input[type="text"],
+            .searchBox button {
+                box-sizing: content-box;
+                margin: 0;
+                padding: 0 0.5rem;
+                height: 1.5rem;
+                border: none;
+                outline: none;
+                color: white;
+            }
+            .searchBox input[type="text"] {
+                width: 20rem;
+                font-size: 1rem;
+                border-bottom: solid 1px var(--white-5);
+                background-color: transparent;
+            }
+            .searchBox button {
+                cursor: pointer;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-weight: bold;
+                font-size: 0.8rem;
+                text-wrap: nowrap;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
+                border: solid 1px var(--white-5);
+                background-color: var(--white-3);
+                backdrop-filter: blur(8px);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="panel">
+            <h1>よおこそ！</h1>
+
+            <h2>インターネット検索</h2>
+
+            <div class="searchBox">
+                <label for="searchByGoogle">Google</label>
+                <input type="text" id="searchByGoogle">
+                <button onclick="searchByGoogle()">検索</button>
+            </div>
+
+            <div class="searchBox">
+                <label for="searchByDuckDuckGo">DuckDuckGo</label>
+                <input type="text" id="searchByDuckDuckGo">
+                <button onclick="searchByDuckDuckGo()">検索</button>
+            </div>
+
+            <h2>ブックマーク</h2>
+
+            <ul>
+                <li>
+                    <a href="https://gensokyoradio.net/playing/" target="_blank">Gensokyo Radio</a>
+                </li>
+                <li>
+                    <a href="https://retrowave.one/" target="_blank">Retrowave.One Radio</a>
+                </li>
+                <li>
+                    <a href="https://plaza.one/" target="_blank">Nightwave Plaza</a>
+                </li>
+                <li>
+                    <a href="https://translate.google.com/?sl=auto&tl=ja&op=translate" target="_blank">Google 翻訳</a>
+                </li>
+            </ul>
+
+            <h2>アカウント</h2>
+
+            <ul>
+                <li>
+                    <a href="https://527bd5b5.github.io/" target="_blank">Homepage</a>
+                </li>
+                <li>
+                    <a href="https://x.com/527bd5b5" target="_blank">X</a>
+                </li>
+                <li>
+                    <a href="https://www.reddit.com/user/527bd5b5/" target="_blank">Reddit</a>
+                </li>
+                <li>
+                    <a href="https://www.youtube.com/@527bd5b5" target="_blank">YouTube</a>
+                </li>
+                <li>
+                    <a href="https://github.com/527bd5b5" target="_blank">GitHub</a>
+                </li>
+            </ul>
+        </div>
+
+        <script>
+            const searchByGoogleElement = document.getElementById("searchByGoogle");
+            const searchByDuckDuckGoElement = document.getElementById("searchByDuckDuckGo");
+
+            function addEneterKeydownEventListener(element, func) {
+                element.addEventListener("keydown", (e) => {
+                    if (e.key !== "Enter")
+                        return;
+
+                    func();
+
+                    e.preventDefault();
+                });
+            }
+
+            addEneterKeydownEventListener(searchByGoogleElement, searchByGoogle);
+            addEneterKeydownEventListener(searchByDuckDuckGoElement, searchByDuckDuckGo);
+
+            function searchByGoogle() {
+                window.open(`https://www.google.com/search?udm=14&q=${searchByGoogleElement.value}`);
+
+                searchByGoogleElement.value = "";
+            }
+
+            function searchByDuckDuckGo() {
+                window.open(`https://start.duckduckgo.com/?kl=jp-jp&ks=m&q=${searchByDuckDuckGoElement.value}`);
+
+                searchByDuckDuckGoElement.value = "";
+            }
+
+            window.onload = () => searchByGoogleElement.focus();
+        </script>
+    </body>
+</html>

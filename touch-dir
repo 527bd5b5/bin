@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# touch-dir <target_directory?> <timestamp?>
+# ディレクトリーに存在する全てのファイルやフォルダーの更新日時を変更します。
+
+if [ -z "$1" ]; then
+    targetDirectory="$(pwd)"
+    targetDirectory="${targetDirectory%/}"
+elif [ ! -d "$1" ]; then
+    echo "You probably specified the wrong directory!"
+
+    exit
+else
+    targetDirectory="${1%/}"
+fi
+
+if [ ! -d "$2" ]; then
+    timestamp="1970/01/01 00:00:00"
+else
+    timestamp="$2"
+fi
+
+if [ -z "$targetDirectory" ] || [ "$targetDirectory" = "/home/${USER}" ]; then
+    echo "You probably specified the wrong directory!"
+
+    exit
+fi
+
+find "$targetDirectory"/ -name "*" -print0 | \
+xargs -0i touch -cd "$timestamp" "{}"

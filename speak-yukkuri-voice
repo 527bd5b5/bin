@@ -1,0 +1,109 @@
+#!/bin/bash
+
+# speak-yukkuri-voice <output_directory?> <init_index?>
+# AquesTalkPiを用いて機械音声（ゆっくりボイス）の再生や出力（字幕スクリーン付き）を対話形式で行います。実行にはAquesTalkPi、aarch64-linux-gnu-gcc、qemu-user-static、soxが必要です。ユーザーは用途に応じてスクリプト内の定数やロジックを設定する必要があります。
+
+export QEMU_LD_PREFIX="/usr/aarch64-linux-gnu/"
+
+BIN="/home/${USER}/bin/AquesTalkPi/AquesTalkPi_x64" # https://www.a-quest.com/products/aquestalkpi.html
+OPTION="-b -s 110"
+SILENCE_LENGTH=0.2
+SUBTITLE_IMAGE_SIZE="1920x1080"
+SUBTITLE_FONT_PATH="/usr/share/fonts/noto-cjk/NotoSansCJK-Black.ttc"
+SUBTITLE_FONT_SIZE=48
+
+if [ -d "$1" ]; then
+    outputDirectory="${1%/}"
+else
+    outputDirectory="."
+fi
+
+if [[ "$2" =~ ^[0-9]+$ ]]; then
+    index=$2
+else
+    index=1
+fi
+
+char=1
+textBuffer=""
+
+function exportVoice {
+    local alias="${textBuffer//[ -\/:-@\[-\`{-~]/_}"
+    local outputFile="$(printf "%04d" "$index")_${alias:0:246}"
+
+    echo "Export voice ... ${outputFile}.wav"
+
+    local output="${outputDirectory}/${outputFile}.wav"
+    local temporary1="${outputDirectory}/${outputFile}_1.wav"
+    local temporary2="${outputDirectory}/${outputFile}_2.wav"
+    local silence="${outputDirectory}/silence.wav"
+
+    qemu-aarch64-static "$BIN" $OPTION -v f$char "$textBuffer" > "$temporary1"
+
+    sox "$temporary1" "$temporary2" \
+        silence 1 0.01 0% \
+        reverse \
+        silence 1 0.01 0% \
+        reverse
+
+    sox -nr 8000 -c 1 "$silence" trim 0.0 $SILENCE_LENGTH
+    sox "$temporary2" "$silence" "$output"
+
+    rm "$temporary1" "$temporary2" "$silence"
+}
+
+function exportSubtitle {
+    local alias="${textBuffer//[ -\/:-@\[-\`{-~]/_}"
+    local outputFile="$(printf "%04d" "$index")_${alias:0:246}.png"
+
+    if [ $char = 1 ]; then
+        local color="#f00"
+    elif [ $char = 2 ]; then
+        local color="#ff0"
+    else
+        local color="#fff"
+    fi
+
+    echo "Export subtitle ... ${outputFile}"
+
+    magick \
+        -size "$SUBTITLE_IMAGE_SIZE" \
+        -background "#00000000" \
+        -font "$SUBTITLE_FONT_PATH" \
+        -pointsize $SUBTITLE_FONT_SIZE \
+        -gravity south \
+        -fill "$color" \
+        -stroke "#000" \
+        -strokewidth 2 \
+        caption:"$textBuffer\n" \
+        "${outputDirectory}/${outputFile}"
+}
+
+while true; do
+    read -ep "> " text
+
+    if [ "$text" = "/exit" ]; then
+        exit 0
+    elif [ "$text" = "/e" ]; then
+        exportVoice
+        exportSubtitle
+
+        index=$((index + 1))
+    elif [ "$text" = "/v" ]; then
+        exportVoice
+
+        index=$((index + 1))
+    elif [ "$text" = "/s" ]; then
+        exportSubtitle
+
+        # index=$((index + 1))
+    elif [[ "$text" =~ ^/c\ ([0-9]+)$ ]]; then
+        char=${BASH_REMATCH[1]}
+    elif [[ "$text" =~ ^/i\ ([0-9]+)$ ]]; then
+        index=${BASH_REMATCH[1]}
+    elif [ ! -z "$text" ]; then
+        qemu-aarch64-static "$BIN" $OPTION -v f$char "$text" | aplay -q
+
+        textBuffer="$text"
+    fi
+done
