@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# rename-to-hash <target_directory?>
+# ディレクトリーに存在する全てのファイルの名前をハッシュ値に変更します。
+
+if [ -d "$1" ]; then
+    targetDirectory="${1%/}"
+else
+    targetDirectory="."
+fi
+
+function renameToHash {
+    targetFrom="$1"
+    targetTo="${targetFrom%/*}/$(sha256sum -b "$targetFrom" | awk "{print \$1}").${targetFrom##*.}"
+
+    mv --backup=t "$targetFrom" "$targetTo" && echo "Rename file ... ${targetFrom} -> ${targetTo##*/}"
+}
+
+export -f renameToHash
+
+find "$targetDirectory" -type f -name "*" -print0 | \
+xargs -0i bash -c "renameToHash \"{}\""
