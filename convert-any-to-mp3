@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# convert-any-to-mp3 <input_file> <output_file?>
+# 任意のファイルを音声ファイルに変換します。実行にはFFmpegが必要です。
+
+SAMPLING_RATE=48000
+BIT_RATE=192k
+
+if [ -z "$1" ] || [ ! -f "$1" ]; then
+    echo "Please specify a target file!"
+
+    exit
+else
+    targetFrom="$1"
+fi
+
+if [ -z "$2" ]; then
+    targetTo="${targetFrom%.*}.mp3"
+else
+    targetTo="$2"
+fi
+
+ffmpeg \
+    -i "$targetFrom" \
+    -ar $SAMPLING_RATE \
+    -ab $BIT_RATE \
+    -loglevel error \
+    "$targetTo"
