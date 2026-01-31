@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# convert-image-to-mp4 <frame_rate?> <target_directory?> <target_format?>
+# 連番画像から動画ファイルを作成します。実行にはFFmpegが必要です。
+
+VIDEO_CODEC="libx264"
+PIXEL_FORMAT="yuv420p"
+
+if [ -z "$1" ]; then
+    frameRate="30"
+else
+    frameRate="$1"
+fi
+
+if [ -z "$2" ]; then
+    targetDirectory="$(pwd)"
+    targetDirectory="${targetDirectory%/}"
+else
+    targetDirectory="${2%/}"
+fi
+
+if [ -z "$3" ]; then
+    targetFormat="%04d.jpg"
+else
+    targetFormat="$3"
+fi
+
+ffmpeg \
+    -r "$frameRate" \
+    -i "${targetDirectory}/${targetFormat}" \
+    -vcodec "$VIDEO_CODEC" \
+    -pix_fmt "$PIXEL_FORMAT" \
+    -loglevel error \
+    "${targetDirectory}/../$(basename "$targetDirectory").mp4"
