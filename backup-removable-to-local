@@ -1,11 +1,41 @@
 #!/bin/bash
 
 # backup-removable-to-local
-# 外部メディア等から特定のディレクトリーを複製します。ユーザーは用途に応じてスクリプト内の定数、複製元、複製先を設定する必要があります。
+# 暗号化されたデバイスから特定のディレクトリーを複製します。ユーザーは用途に応じてスクリプト内の定数、複製元、複製先を設定する必要があります。
 
-BACKUP_DIRECTORY_FROM="/run/media/${USER}/backup"
+DEVICE_NAME="backup"
+DEVICE_MOUNT_POINT="/home/${USER}/backup"
+
+BACKUP_DIRECTORY_FROM="$DEVICE_MOUNT_POINT"
 BACKUP_DIRECTORY_TO="/home/${USER}"
 EXCLUDE_LIST="/home/${USER}/bin/backup-ignore.txt"
+
+if [ "$(df --output=target "$DEVICE_MOUNT_POINT" 2>/dev/null | tail -n +2)" != "$DEVICE_MOUNT_POINT" ]; then
+    # ~/bin/mount-backup
+
+    lsblk
+
+    read -p "Enter the device name (/dev/*): " blockDeviceName
+
+    if [ -z "$blockDeviceName" ]; then
+        echo "Put something in!"
+
+        exit
+    fi
+
+    blockDeviceName="/dev/$blockDeviceName"
+
+    sudo cryptsetup open "$blockDeviceName" "$DEVICE_NAME"
+
+    if [ $? != 0 ]; then
+        echo "Failed to open the backup device."
+
+        exit
+    fi
+
+    mkdir -p "$DEVICE_MOUNT_POINT"
+    sudo mount "/dev/mapper/${DEVICE_NAME}" "$DEVICE_MOUNT_POINT"
+fi
 
 read -p "Are you sure you want to run \"${0##*/}\"? (Enter \"yes\" or anything else): " confirm
 
@@ -26,3 +56,8 @@ backupDirectory \
 backupDirectory \
     "${BACKUP_DIRECTORY_FROM}/projects" \
     "${BACKUP_DIRECTORY_TO}"
+
+# ~/bin/umount-backup
+
+sudo umount "$DEVICE_MOUNT_POINT"
+sudo cryptsetup close "$DEVICE_NAME"

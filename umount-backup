@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# mount-backup
+# 暗号化されたデバイスをアンマウントします。
+
+DEVICE_NAME="backup"
+DEVICE_MOUNT_POINT="/home/${USER}/backup"
+
+sudo umount "$DEVICE_MOUNT_POINT"
+sudo cryptsetup close "$DEVICE_NAME"

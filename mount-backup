@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# mount-backup
+# 暗号化されたデバイスをマウントします。
+
+DEVICE_NAME="backup"
+DEVICE_MOUNT_POINT="/home/${USER}/backup"
+
+lsblk
+
+read -p "Enter the device name (/dev/*): " blockDeviceName
+
+if [ -z "$blockDeviceName" ]; then
+    echo "Put something in!"
+
+    exit
+fi
+
+blockDeviceName="/dev/$blockDeviceName"
+
+sudo cryptsetup open "$blockDeviceName" "$DEVICE_NAME"
+
+if [ $? != 0 ]; then
+    echo "Failed to open the backup device."
+
+    exit
+fi
+
+mkdir -p "$DEVICE_MOUNT_POINT"
+sudo mount "/dev/mapper/${DEVICE_NAME}" "$DEVICE_MOUNT_POINT"
