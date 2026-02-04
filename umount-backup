@@ -6,5 +6,11 @@
 DEVICE_NAME="backup"
 DEVICE_MOUNT_POINT="/home/${USER}/backup"
 
+read -p "Are you sure you want to run \"${0##*/}\"? (Enter \"yes\" or anything else): " confirm
+
+if [ "$confirm" != "yes" ]; then
+    exit
+fi
+
 sudo umount "$DEVICE_MOUNT_POINT"
 sudo cryptsetup close "$DEVICE_NAME"
