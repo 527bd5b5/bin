@@ -20,6 +20,12 @@ fi
 
 blockDeviceName="/dev/$blockDeviceName"
 
+read -p "Are you sure you want to run \"${0##*/}\"? (Enter \"yes\" or anything else): " confirm
+
+if [ "$confirm" != "yes" ]; then
+    exit
+fi
+
 sudo parted "$blockDeviceName" --script mklabel gpt mkpart primary 0% 100% || exit
 sudo cryptsetup luksFormat --type luks "$blockDeviceName"
 sudo cryptsetup open "$blockDeviceName" "$DEVICE_NAME"
