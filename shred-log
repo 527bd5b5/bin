@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# shred-tmp
+# ログを抹消します。
+
+shred-dir -y /var/log
