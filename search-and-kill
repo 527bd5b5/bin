@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# search-and-kill
+# search-and-kill <name?>
 # プロセスを検索・停止するための簡易的なスクリプトです。
 
-read -p "Enter the process name to search: " name
+if [ -z "$1" ]; then
+    read -p "Enter the process name to search: " name
+else
+    name="$1"
+fi
 
 if [ -z "$name" ]; then
     echo "Put something in!"
