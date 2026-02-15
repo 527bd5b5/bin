@@ -1,25 +1,19 @@
 #!/bin/bash
 
-# shred-dir [-y] <target_directory?>
+# shred-dir [-sy] <target_directory?>
 # ディレクトリーに存在する全てのファイルを抹消します。
 
+useSudo=0
 confirm=""
 
-while getopts :y OPT; do
+while getopts :sy OPT; do
     case $OPT in
+        s) useSudo=1;;
         y) confirm="yes";;
     esac
 done
 
 shift $((OPTIND - 1))
-
-if [ "$confirm" != "yes" ]; then
-    read -p "Are you sure you want to run \"${0##*/}\"? (Enter \"yes\" or anything else): " confirm
-fi
-
-if [ "$confirm" != "yes" ]; then
-    exit
-fi
 
 if [ -z "$1" ]; then
     targetDirectory="$(pwd)"
@@ -38,6 +32,20 @@ if [ -z "$targetDirectory" ] || [ "$targetDirectory" = "/home/${USER}" ]; then
     exit
 fi
 
-sudo find "$targetDirectory"/ -type f -name "*" -print0 | \
-xargs -0i sudo shred -n 1 -uz "{}" && \
-sudo rm -rf "$targetDirectory"/.*
+if [ "$confirm" != "yes" ]; then
+    read -p "Are you sure you want to run \"${0##*/}\"? (Enter \"yes\" or anything else): " confirm
+fi
+
+if [ "$confirm" != "yes" ]; then
+    exit
+fi
+
+if [ $useSudo = 1 ]; then
+    sudo find "$targetDirectory"/ -type f -name "*" -print0 | \
+    xargs -0i sudo shred -n 1 -uz "{}" && \
+    sudo rm -rf "$targetDirectory"/*/
+else
+    find "$targetDirectory"/ -type f -name "*" -print0 | \
+    xargs -0i shred -n 1 -uz "{}" && \
+    rm -rf "$targetDirectory"/*/
+fi

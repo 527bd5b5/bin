@@ -3,4 +3,4 @@
 # shred-tmp
 # ログを抹消します。
 
-shred-dir -y /var/log
+shred-dir -sy /var/log

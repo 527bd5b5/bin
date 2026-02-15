@@ -3,5 +3,5 @@
 # shred-tmp
 # 一時ディレクトリーを抹消します。
 
-shred-dir -y /tmp
-shred-dir -y /var/tmp
+shred-dir -sy /tmp
+shred-dir -sy /var/tmp
