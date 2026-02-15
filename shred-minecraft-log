@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# shred-minecraft-log
+# Minecraftに関するログを削除します。
+
+MINECRAFT_LAUNCHER_DIR="/home/${USER}/.minecraft"
+MINECRAFT_CLIENT_DIR="${MINECRAFT_LAUNCHER_DIR}/clients"
+
+function shred-files {
+    find "$1"/ -mindepth 1 -maxdepth 1 -type f -name "$2" -print0 | \
+    xargs -0i shred -n 1 -uz "{}"
+}
+
+shred-files "$MINECRAFT_LAUNCHER_DIR" "bootstrap_log*.txt"
+shred-files "$MINECRAFT_LAUNCHER_DIR" "launcher_cef_log.txt"
+shred-files "$MINECRAFT_LAUNCHER_DIR" "launcher_log*.txt"
+
+find "$MINECRAFT_CLIENT_DIR"/ -mindepth 1 -maxdepth 1 -type d -name "*" -print0 | \
+xargs -0i shred-dir -y "{}/logs"
