@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# generate-pdf-thumbnail <target_file>
+# PDFファイルのサムネイルを生成します。実行にはImageMagickが必要です。
+
+WIDTH=1920
+HEIGHT=1080
+GRADATION_COLOR="#ffffff"
+
+if [ -z "$1" ] || [ ! -f "$1" ]; then
+    echo "Please specify a target file!"
+
+    exit
+fi
+
+outputFile="${1%.*}_thumbnail"
+
+pdftoppm \
+    -singlefile \
+    -r 300 \
+    -png \
+    "$1" "${outputFile}_1"
+
+mogrify \
+    -resize "${WIDTH}x${HEIGHT}^" \
+    -gravity north \
+    -crop "${WIDTH}:${HEIGHT}" \
+    "${outputFile}_1.png"
+
+magick \
+    -size "${WIDTH}x$((HEIGHT / 2))" \
+    "gradient:#00000000-${GRADATION_COLOR}" \
+    "${outputFile}_2.png"
+
+magick \
+    -gravity south \
+    -compose over \
+    "${outputFile}_1.png" "${outputFile}_2.png" \
+    -composite "${outputFile}.png"
+
+rm -rf \
+    "${outputFile}_1.png" \
+    "${outputFile}_2.png"
