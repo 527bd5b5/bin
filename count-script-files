@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# count-script-files <target_file_extensions> <target_directory?>
+# ディレクトリーに存在する特定のファイルの行数と合計を出力します。
+
+if [ -z "$1" ]; then
+    echo "Please specify a target file extension(s)! (e.g. \"js|json\")"
+
+    exit
+fi
+
+targetFileExtension=".*\.(${1})"
+
+if [ -d "$2" ]; then
+    targetDirectory="${2%/}"
+else
+    targetDirectory="."
+fi
+
+lineSum=0
+
+IFS=$'\n'
+
+for targetFile in $(find "$targetDirectory"/ -type f -regextype posix-extended -regex "$targetFileExtension"); do
+    lineNum=$(cat "$targetFile" | wc -l)
+    lineSum=$(($lineSum + $lineNum))
+
+    echo "${targetFile}: ${lineNum}"
+done
+
+echo "Total: ${lineSum} line(s)"
