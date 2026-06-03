@@ -1,18 +1,20 @@
 #!/bin/bash
 
-# check-sum <hash_file>
+# check-sum <hash_file...>
 # ハッシュファイル（SHA256形式）を用いて特定のファイルが破損・改竄されていないか検証します。
 
-if [ -z "$1" ] || [ ! -f "$1" ]; then
+if [ -z "$1" ]; then
     echo "Please specify a target file!"
 
     exit
 fi
 
-if [ "${1##*.}" != "sha256" ]; then
-    echo "Please specify a checksum file (extension: sha256)!"
-
-    exit
-fi
-
-sha256sum -c "$1"
+for targetFile in "$@"; do
+    if [ ! -f "$targetFile" ]; then
+        echo "${targetFile} is not a file!"
+    elif [ "${targetFile##*.}" != "sha256" ]; then
+        echo "Please specify a checksum file (extension: sha256)!"
+    else
+        sha256sum -c "$targetFile"
+    fi
+done

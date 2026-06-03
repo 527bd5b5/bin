@@ -1,12 +1,18 @@
 #!/bin/bash
 
-# create-sum <target_file>
+# create-sum <target_file...>
 # ファイルの破損・改竄を検証するためのハッシュファイル（SHA256形式）を作成します。
 
-if [ -z "$1" ] || [ ! -f "$1" ]; then
+if [ -z "$1" ]; then
     echo "Please specify a target file!"
 
     exit
 fi
 
-sha256sum -b "$1" > "${1}.sha256"
+for targetFile in "$@"; do
+    if [ -f "$targetFile" ]; then
+        sha256sum -b "$targetFile" > "${targetFile}.sha256"
+    else
+        echo "${targetFile} is not a file!"
+    fi
+done
