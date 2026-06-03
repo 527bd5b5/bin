@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# reset-dir-permission <target_directory?>
+# ディレクトリーに存在する全てのファイル・フォルダーの権限を初期化します。
+# フォルダー: 755, ファイル: 644
+
+if [ -z "$1" ]; then
+    targetDirectory="$(pwd)"
+    targetDirectory="${targetDirectory%/}"
+elif [ ! -d "$1" ]; then
+    echo "You probably specified the wrong directory!"
+
+    exit
+else
+    targetDirectory="${1%/}"
+fi
+
+if [ -z "$targetDirectory" ] || [ "$targetDirectory" = "/home/${USER}" ]; then
+    echo "You probably specified the wrong directory!"
+
+    exit
+fi
+
+function resetPermission {
+    if [ -d "$1" ]; then
+        chmod 755 "$1"
+    elif [ -f "$1" ]; then
+        chmod 644 "$1"
+    fi
+}
+
+export -f resetPermission
+
+find "$targetDirectory"/ -name "*" -print0 | \
+xargs -0i bash -c "resetPermission \"{}\""
