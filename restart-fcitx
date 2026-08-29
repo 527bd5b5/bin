@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# restart-fcitx
+# Fcitxを再起動します。
+
+function restartFcitx {
+    pidof fcitx5 | xargs kill -9
+
+    fcitx5 &
+}
+
+restartFcitx > /dev/null 2>&1
