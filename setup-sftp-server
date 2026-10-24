@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# setup-sftp-server
+# SFTPサーバーに必要なユーザーとルートディレクトリーを設定します。
+
+DEFAULT_SFTP_USERNAME="sftp"
+DEFAULT_SFTP_CHROOT="/run/media/${USER}/share"
+
+read -p "Enter the username for SFTP (default is ${DEFAULT_SFTP_USERNAME}): " username
+
+if [ -z "$username" ]; then
+    username="$DEFAULT_SFTP_USERNAME"
+fi
+
+if [[ ! "$username" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
+    echo "The string \"${username}\" can't be used as Linux."
+
+    exit
+fi
+
+sudo useradd $username
+sudo passwd $username
+
+read -p "Enter the ${username}'s directory (chroot, default is ${DEFAULT_SFTP_CHROOT}): " chrootDirectory
+
+if [ -z "$chrootDirectory" ]; then
+    chrootDirectory="$DEFAULT_SFTP_CHROOT"
+fi
+
+sudo cp -ip /etc/ssh/sshd_config /etc/ssh/sshd_config_bk
+sudo tee /etc/ssh/sshd_config -a << EOF
+
+Subsystem sftp internal-sftp
+
+Match User ${username}
+    ChrootDirectory ${chrootDirectory}
+    X11Forwarding no
+    AllowTcpForwarding no
+    PasswordAuthentication yes
+    ForceCommand internal-sftp
+EOF
+
+sudo chown root "$chrootDirectory"
+sudo systemctl restart sshd.service
