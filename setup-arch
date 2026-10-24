@@ -1,0 +1,125 @@
+#!/bin/bash
+
+# setup-arch
+# コンピューターに必要なソフトウェアやコンフィグを設定します。私の個人的なスクリプトです。
+
+if [ "$(cat /etc/os-release | grep "ID_LIKE=")" != 'ID_LIKE="arch"' ]; then
+    echo "This script must be run on an Arch-based Linux distribution."
+
+    exit
+fi
+
+read -p \
+    "Do you want to install NVIDIA drivers? (Enter \"1\" or anything else): " \
+    needInstallNvidiaDrivers
+
+read -p \
+    "Do you want to install advanced applications? (Enter \"1\" or anything else): " \
+    needInstallAdvancedApplications
+
+read -p \
+    "Do you want to add a configuration to rotate the screen at startup (for GPD MicroPC)? (Enter \"1\" or anything else): " \
+    needAddRotateScreenScript
+
+pacman --version > /dev/null 2>&1
+
+if [ $? != 0 ]; then
+    echo "\"pacman\" is not installed."
+
+    exit
+fi
+
+yay --version > /dev/null 2>&1
+
+if [ $? != 0 ]; then
+    echo "\"yay\" is not installed."
+
+    exit
+fi
+
+yay -Syyu # sudo pacman -Syyu
+
+sudo pacman -S --noconfirm vim
+sudo pacman -S --noconfirm sshfs
+sudo pacman -S --noconfirm aarch64-linux-gnu-gcc
+sudo pacman -S --noconfirm qemu-user-static
+sudo pacman -S --noconfirm sox
+sudo pacman -S --noconfirm gparted
+sudo pacman -S --noconfirm fcitx5 fcitx5-im fcitx5-mozc fcitx5-gtk fcitx5-qt fcitx5-configtool
+sudo pacman -S --noconfirm p7zip
+sudo pacman -S --noconfirm jdk-openjdk
+sudo pacman -S --noconfirm python-pip
+sudo pacman -S --noconfirm nodejs
+sudo pacman -S --noconfirm npm
+sudo pacman -S --noconfirm libreoffice-still libreoffice-still-ja
+sudo pacman -S --noconfirm gimp
+sudo pacman -S --noconfirm krita
+sudo pacman -S --noconfirm inkscape
+sudo pacman -S --noconfirm darktable
+sudo pacman -S --noconfirm blender
+sudo pacman -S --noconfirm kdenlive
+sudo pacman -S --noconfirm audacity
+sudo pacman -S --noconfirm lmms
+sudo pacman -S --noconfirm obs-studio
+sudo pacman -S --noconfirm wine
+
+if [ "$needInstallNvidiaDrivers" = 1 ]; then
+    sudo pacman -S --noconfirm nvidia nvidia-utils nvidia-settings
+
+    yay -S --noconfirm optimus-manager
+
+    # optimus-manager --switch nvidia
+fi
+
+if [ "$needInstallAdvancedApplications" = 1 ]; then
+    sudo pacman -S --noconfirm discord
+
+    yay -S --noconfirm minecraft-launcher
+fi
+
+tee ~/.bashrc << 'EOF'
+#!/bin/bash
+
+[[ $- != *i* ]] && return
+
+source ~/python/venv/bin/activate
+
+export PATH=$PATH:~/bin
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias clean='source clean'
+
+PS1='\W \$ '
+
+clean
+EOF
+
+if [ "$needAddRotateScreenScript" = 1 ]; then
+    echo "xrandr --output DSI-1 --rotate right" >> ~/.bash_profile
+fi
+
+tee ~/.xinitrc << 'EOF'
+export GTK_IM_MODULE=fcitx5
+export QT_IM_MODULE=fcitx5
+export XMODIFIERS=@im=fcitx5
+EOF
+
+tee ~/.xprofile << 'EOF'
+export GTK_IM_MODULE=fcitx5
+export QT_IM_MODULE=fcitx5
+export XMODIFIERS=@im=fcitx5
+EOF
+
+python -m venv ~/python/venv
+
+echo "background=#000000" | \
+sudo tee -a /etc/lightdm/slick-greeter.conf 1> /dev/null # for i3-wm
+
+read -p \
+    "Do you want to reboot now? (Enter \"yes\" or anything else): " \
+    rebootNow
+
+if [ "$rebootNow" = "yes" ]; then
+    sudo reboot now
+fi

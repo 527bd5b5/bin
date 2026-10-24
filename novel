@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# novel
+# CatNoteMemoを起動します。私の個人的なスクリプトです。
+
+WINE=~/.wine
+CAT_MEMO_NOTE=~/projects/novels/CatMemoNote
+
+function runNovel {
+    regedit ${CAT_MEMO_NOTE}/wine-japanese.reg
+    wine ${CAT_MEMO_NOTE}/CatMemoNote.exe
+
+    rm ${CAT_MEMO_NOTE}/system_backup.ini
+}
+
+function startNovel {
+    runNovel &
+}
+
+startNovel > /dev/null 2>&1
